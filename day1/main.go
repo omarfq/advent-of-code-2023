@@ -8,7 +8,6 @@ import (
 )
 
 func main() {
-	// open file
 	file, err := os.Open("input.txt")
 	if err != nil {
 		fmt.Println(err)
@@ -17,7 +16,6 @@ func main() {
 
 	result := 0
 
-	// start reading file line by line
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		result += getCalibrationDigits(scanner.Text())
