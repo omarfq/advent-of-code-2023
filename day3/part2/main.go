@@ -32,7 +32,7 @@ func main() {
 	}
 
 	symbols := identify_symbols(engineSchematic)
-	sumOfAllPartNumbers := sumAdjacentNumbers(engineSchematic, symbols)
+	sumOfAllPartNumbers := sumGearRatios(engineSchematic, symbols)
 
 	//fmt.Println(symbols)
 	//fmt.Println(engineSchematic)
@@ -61,27 +61,38 @@ func identify_symbols(engineSchematic [][]string) map[symbol]bool {
 	return symbols
 }
 
-func sumAdjacentNumbers(engineSchematic [][]string, symbols map[symbol]bool) int {
+func sumGearRatios(engineSchematic [][]string, symbols map[symbol]bool) int {
 	numRows, numCols := len(engineSchematic), len(engineSchematic[0])
 	sum := 0
+	adjacentNumbers := []int{}
 	counted := make(map[string]bool)
 
 	for sym := range symbols {
-		for row := max(0, sym.rowNumber-1); row <= min(numRows-1, sym.rowNumber+1); row++ {
-			for col := max(0, sym.colNumber-1); col <= min(numCols-1, sym.colNumber+1); col++ {
-				if row == sym.rowNumber && col == sym.colNumber {
-					continue // Skip the symbol itself
-				}
+		if sym.symbol == "*" {
+			for row := max(0, sym.rowNumber-1); row <= min(numRows-1, sym.rowNumber+1); row++ {
+				for col := max(0, sym.colNumber-1); col <= min(numCols-1, sym.colNumber+1); col++ {
+					if row == sym.rowNumber && col == sym.colNumber {
+						continue // Skip the symbol itself
+					}
 
-				if _, err := strconv.Atoi(engineSchematic[row][col]); err == nil {
-					fullNumber, posID := findFullNumber(engineSchematic, row, col, numRows, numCols)
-					if !counted[posID] {
-						num, _ := strconv.Atoi(fullNumber)
-						sum += num
-						counted[posID] = true
+					if _, err := strconv.Atoi(engineSchematic[row][col]); err == nil {
+						fullNumber, posID := findFullNumber(engineSchematic, row, col, numRows, numCols)
+						if !counted[posID] {
+							num, _ := strconv.Atoi(fullNumber)
+							adjacentNumbers = append(adjacentNumbers, num)
+							counted[posID] = true
+						}
 					}
 				}
 			}
+			fmt.Println(adjacentNumbers)
+			if len(adjacentNumbers) == 2 {
+				gearRatio := adjacentNumbers[0] * adjacentNumbers[1]
+				sum += gearRatio
+			}
+			adjacentNumbers = []int{}
+		} else {
+			continue
 		}
 	}
 
@@ -92,19 +103,16 @@ func findFullNumber(engineSchematic [][]string, row, col, numRows, numCols int) 
 	number := engineSchematic[row][col]
 	left, right := col, col
 
-	// Extend to the left
 	for left > 0 && isDigit(engineSchematic[row][left-1]) {
 		left--
 		number = engineSchematic[row][left] + number
 	}
 
-	// Extend to the right
 	for right < numCols-1 && isDigit(engineSchematic[row][right+1]) {
 		right++
 		number = number + engineSchematic[row][right]
 	}
 
-	// Unique position identifier for the entire number
 	posID := fmt.Sprintf("%d-%d:%d", row, left, right)
 	return number, posID
 }
