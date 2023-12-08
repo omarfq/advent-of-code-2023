@@ -34,8 +34,6 @@ func main() {
 	symbols := identify_symbols(engineSchematic)
 	sumOfAllPartNumbers := sumAdjacentNumbers(engineSchematic, symbols)
 
-	//fmt.Println(symbols)
-	//fmt.Println(engineSchematic)
 	fmt.Println(sumOfAllPartNumbers)
 }
 
@@ -92,19 +90,16 @@ func findFullNumber(engineSchematic [][]string, row, col, numRows, numCols int) 
 	number := engineSchematic[row][col]
 	left, right := col, col
 
-	// Extend to the left
 	for left > 0 && isDigit(engineSchematic[row][left-1]) {
 		left--
 		number = engineSchematic[row][left] + number
 	}
 
-	// Extend to the right
 	for right < numCols-1 && isDigit(engineSchematic[row][right+1]) {
 		right++
 		number = number + engineSchematic[row][right]
 	}
 
-	// Unique position identifier for the entire number
 	posID := fmt.Sprintf("%d-%d:%d", row, left, right)
 	return number, posID
 }
